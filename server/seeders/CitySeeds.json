@@ -1,0 +1,19 @@
+[
+    {
+      "name": "City A",
+      "country": "US",
+      "weather": [
+        { "description": "Sunny", "temperature": 25, "humidity": 50 },
+        { "description": "Cloudy", "temperature": 20, "humidity": 60 }
+      ]
+    },
+    {
+      "name": "City B",
+      "country": "UK",
+      "weather": [
+        { "description": "Rainy", "temperature": 15, "humidity": 70 },
+        { "description": "Snowy", "temperature": 0, "humidity": 80 }
+      ]
+    }
+  ]
+  
