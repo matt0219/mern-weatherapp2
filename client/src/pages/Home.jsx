@@ -54,6 +54,46 @@ const Home = () => {
       .catch((error) => console.error('Error fetching weather data:', error));
   };
 
+  // Function to fetch weather data based on user's geolocation
+  const getWeatherByGeolocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchWeatherData(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error getting geolocation:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by your browser.');
+    }
+  };
+
+  // Function to fetch weather data based on coordinates
+  const fetchWeatherData = (latitude, longitude) => {
+    const apiKey = 'bf19d4bdac3dc5d16eee164d97dd9c60';
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        const temperatureFahrenheit = data.main.temp;
+        const humidity = data.main.humidity;
+        const windSpeed = data.wind.speed;
+        const forecast = data.weather[0].description;
+
+        setWeatherData({
+          temperatureFahrenheit,
+          humidity,
+          windSpeed,
+          forecast,
+        });
+      })
+      .catch((error) => console.error('Error fetching weather data:', error));
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Weather App</h1>
@@ -68,6 +108,7 @@ const Home = () => {
         <button onClick={handleSearch} style={styles.button}>
           Search
         </button>
+        <button onClick={getWeatherByGeolocation}>Get Weather Near Me</button>
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>
