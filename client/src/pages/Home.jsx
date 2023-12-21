@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import CityList from '../components/CityList';
+import axios from 'axios';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [weatherData, setWeatherData] = useState(null);
+  const [airQuality, setAirQuality] = useState(null);
 
   useEffect(() => {
     fetchCities();
@@ -30,6 +31,7 @@ const Home = () => {
 
     const apiKey = import.meta.env.VITE_REACT_APP_OPENWEATHERMAP_API_KEY;
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${apiKey}&units=imperial`;
+    const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=0&lon=0&appid=${apiKey}`;
 
     fetch(apiUrl)
       .then((res) => {
