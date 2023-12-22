@@ -30,21 +30,46 @@ const Home = () => {
     }
 
     const apiKey = import.meta.env.VITE_REACT_APP_OPENWEATHERMAP_API_KEY;
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${apiKey}&units=imperial`;
-    const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=0&lon=0&appid=${apiKey}`;
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${apiKey}&units=imperial`;
 
-    fetch(apiUrl)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
+    let weatherData; // Declare weatherData outside the promise chain
+
+    axios
+      .get(weatherApiUrl)
+      .then((weatherResponse) => {
+        weatherData = weatherResponse.data;
+
+        // Extract latitude and longitude from the weather response
+        const latitude = weatherData.coord.lat;
+        const longitude = weatherData.coord.lon;
+
+        // Update the air quality API URL with the correct latitude and longitude
+        const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+
+        return axios.get(airQualityApiUrl);
       })
-      .then((data) => {
-        const temperatureFahrenheit = data.main.temp;
-        const humidity = data.main.humidity;
-        const windSpeed = data.wind.speed;
-        const forecast = data.weather[0].description;
+      .then((airQualityResponse) => {
+        const airQualityData = airQualityResponse.data.list[0];
+
+        // Check if airQualityData is defined before accessing its properties
+        if (airQualityData) {
+          // Extract relevant information from the response
+          const aqi = airQualityData.main.aqi;
+          const pollutants = airQualityData.components;
+
+          setAirQuality({
+            aqi,
+            pollutants,
+          });
+        } else {
+          console.error('Air quality data is undefined.');
+        }
+
+        // Extract other weather information
+        const temperatureFahrenheit = weatherData.main.temp;
+        const humidity = weatherData.main.humidity;
+        const windSpeed = weatherData.wind.speed;
+        const forecast = weatherData.weather[0].description;
 
         setWeatherData({
           temperatureFahrenheit,
@@ -53,10 +78,9 @@ const Home = () => {
           forecast,
         });
       })
-      .catch((error) => console.error('Error fetching weather data:', error));
+      .catch((error) => console.error('Error fetching data:', error));
   };
 
-  // Function to fetch weather data based on user's geolocation
   const getWeatherByGeolocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -73,18 +97,39 @@ const Home = () => {
     }
   };
 
-  // Function to fetch weather data based on coordinates
   const fetchWeatherData = (latitude, longitude) => {
-    const apiKey = 'bf19d4bdac3dc5d16eee164d97dd9c60';
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+    const apiKey = import.meta.env.VITE_REACT_APP_OPENWEATHERMAP_API_KEY;
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+    const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
 
-    fetch(apiUrl)
-      .then((res) => res.json())
-      .then((data) => {
-        const temperatureFahrenheit = data.main.temp;
-        const humidity = data.main.humidity;
-        const windSpeed = data.wind.speed;
-        const forecast = data.weather[0].description;
+    axios
+      .all([
+        axios.get(weatherApiUrl),
+        axios.get(airQualityApiUrl),
+      ])
+      .then(axios.spread((weatherResponse, airQualityResponse) => {
+        const weatherData = weatherResponse.data;
+        const airQualityData = airQualityResponse.data.list[0];
+
+        // Check if airQualityData is defined before accessing its properties
+        if (airQualityData) {
+          // Extract relevant information from the response
+          const aqi = airQualityData.main.aqi;
+          const pollutants = airQualityData.components;
+
+          setAirQuality({
+            aqi,
+            pollutants,
+          });
+        } else {
+          console.error('Air quality data is undefined.');
+        }
+
+        // Extract other weather information
+        const temperatureFahrenheit = weatherData.main.temp;
+        const humidity = weatherData.main.humidity;
+        const windSpeed = weatherData.wind.speed;
+        const forecast = weatherData.weather[0].description;
 
         setWeatherData({
           temperatureFahrenheit,
@@ -92,8 +137,8 @@ const Home = () => {
           windSpeed,
           forecast,
         });
-      })
-      .catch((error) => console.error('Error fetching weather data:', error));
+      }))
+      .catch((error) => console.error('Error fetching data:', error));
   };
 
   return (
@@ -118,6 +163,15 @@ const Home = () => {
           <p>{`Humidity: ${weatherData.humidity}%`}</p>
           <p>{`Wind Speed: ${weatherData.windSpeed} m/s`}</p>
           <p>{`Forecast: ${weatherData.forecast}`}</p>
+          <p>{`AQI: ${airQuality.aqi}`}</p>
+
+          {airQuality.pollutants && (
+            <ul>
+              {Object.entries(airQuality.pollutants).map(([key, value]) => (
+                <li key={key}>{`${key}: ${value.toFixed(2)}`}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>
