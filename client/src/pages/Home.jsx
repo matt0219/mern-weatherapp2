@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
 const Home = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [cities, setCities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [weatherData, setWeatherData] = useState(null);
@@ -27,7 +27,7 @@ const Home = () => {
 
   const handleSearch = () => {
     if (!searchQuery) {
-      alert('Please enter a location.');
+      alert(t('messages.enterLocation'));
       return;
     }
 
@@ -143,6 +143,10 @@ const Home = () => {
       .catch((error) => console.error('Error fetching data:', error));
   };
 
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>{t('heading')}</h1>
@@ -161,11 +165,11 @@ const Home = () => {
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>
-          <p>{`Temperature in ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
-          <p>{`Humidity: ${weatherData.humidity}%`}</p>
-          <p>{`Wind Speed: ${weatherData.windSpeed} m/s`}</p>
-          <p>{`Forecast: ${weatherData.forecast}`}</p>
-          <p>{`AQI: ${airQuality.aqi}`}</p>
+          <p>{`${t('temperatureIn')} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
+          <p>{`${t('humidity')}: ${weatherData.humidity}%`}</p>
+          <p>{`${t('windSpeed')}: ${weatherData.windSpeed} m/s`}</p>
+          <p>{`${t('forecast')}: ${weatherData.forecast}`}</p>
+          <p>{`${t('aqi')}: ${airQuality.aqi}`}</p>
 
           {airQuality.pollutants && (
             <ul>
@@ -176,6 +180,11 @@ const Home = () => {
           )}
         </div>
       )}
+      <div>
+        <button onClick={() => changeLanguage('en')}>English</button>
+        <button onClick={() => changeLanguage('es')}>Español</button>
+        <button onClick={() => changeLanguage('fr')}>Français</button>
+      </div>
     </div>
   );
 };
