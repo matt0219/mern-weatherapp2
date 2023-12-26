@@ -11,6 +11,10 @@ const Home = () => {
     fetchCities();
   }, []);
 
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   const fetchCities = () => {
     fetch('http://localhost:3001/api/cities')
       .then((res) => {
@@ -25,7 +29,7 @@ const Home = () => {
 
   const handleSearch = () => {
     if (!searchQuery) {
-      alert('Please enter a location.');
+      alert(t('Please enter a location.'));
       return;
     }
 
@@ -39,11 +43,9 @@ const Home = () => {
       .then((weatherResponse) => {
         weatherData = weatherResponse.data;
 
-        // Extract latitude and longitude from the weather response
         const latitude = weatherData.coord.lat;
         const longitude = weatherData.coord.lon;
 
-        // Update the air quality API URL with the correct latitude and longitude
         const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
 
         return axios.get(airQualityApiUrl);
@@ -51,9 +53,7 @@ const Home = () => {
       .then((airQualityResponse) => {
         const airQualityData = airQualityResponse.data.list[0];
 
-        // Check if airQualityData is defined before accessing its properties
         if (airQualityData) {
-          // Extract relevant information from the response
           const aqi = airQualityData.main.aqi;
           const pollutants = airQualityData.components;
 
@@ -65,18 +65,30 @@ const Home = () => {
           console.error('Air quality data is undefined.');
         }
 
-        // Extract other weather information
         const temperatureFahrenheit = weatherData.main.temp;
         const humidity = weatherData.main.humidity;
         const windSpeed = weatherData.wind.speed;
         const forecast = weatherData.weather[0].description;
 
-        setWeatherData({
-          temperatureFahrenheit,
-          humidity,
-          windSpeed,
-          forecast,
-        });
+        if (weatherData.sys && weatherData.sys.sunset !== null) {
+          const sunrise = new Date(weatherData.sys.sunrise * 1000);
+          const sunset = new Date(weatherData.sys.sunset * 1000);
+
+          if (!isNaN(sunset.getTime())) {
+            setWeatherData({
+              temperatureFahrenheit,
+              humidity,
+              windSpeed,
+              forecast,
+              sunrise: formatTime(sunrise),
+              sunset: formatTime(sunset),
+            });
+          } else {
+            console.error('Invalid sunset time:', weatherData.sys.sunset);
+          }
+        } else {
+          console.error('Invalid sunset time or sys object:', weatherData.sys);
+        }
       })
       .catch((error) => console.error('Error fetching data:', error));
   };
@@ -111,9 +123,7 @@ const Home = () => {
         const weatherData = weatherResponse.data;
         const airQualityData = airQualityResponse.data.list[0];
 
-        // Check if airQualityData is defined before accessing its properties
         if (airQualityData) {
-          // Extract relevant information from the response
           const aqi = airQualityData.main.aqi;
           const pollutants = airQualityData.components;
 
@@ -125,18 +135,30 @@ const Home = () => {
           console.error('Air quality data is undefined.');
         }
 
-        // Extract other weather information
         const temperatureFahrenheit = weatherData.main.temp;
         const humidity = weatherData.main.humidity;
         const windSpeed = weatherData.wind.speed;
         const forecast = weatherData.weather[0].description;
 
-        setWeatherData({
-          temperatureFahrenheit,
-          humidity,
-          windSpeed,
-          forecast,
-        });
+        if (weatherData.sys && weatherData.sys.sunset !== null) {
+          const sunrise = new Date(weatherData.sys.sunrise * 1000);
+          const sunset = new Date(weatherData.sys.sunset * 1000);
+
+          if (!isNaN(sunset.getTime())) {
+            setWeatherData({
+              temperatureFahrenheit,
+              humidity,
+              windSpeed,
+              forecast,
+              sunrise: formatTime(sunrise),
+              sunset: formatTime(sunset),
+            });
+          } else {
+            console.error('Invalid sunset time:', weatherData.sys.sunset);
+          }
+        } else {
+          console.error('Invalid sunset time or sys object:', weatherData.sys);
+        }
       }))
       .catch((error) => console.error('Error fetching data:', error));
   };
@@ -147,7 +169,7 @@ const Home = () => {
       <div style={styles.searchContainer}>
         <input
           type="text"
-          placeholder="Enter location"
+          placeholder='Enter location'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.input}
@@ -159,11 +181,13 @@ const Home = () => {
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>
-          <p>{`Temperature in ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
-          <p>{`Humidity: ${weatherData.humidity}%`}</p>
-          <p>{`Wind Speed: ${weatherData.windSpeed} m/s`}</p>
-          <p>{`Forecast: ${weatherData.forecast}`}</p>
-          <p>{`AQI: ${airQuality.aqi}`}</p>
+          <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
+          <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
+          <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
+          <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
+          <p>{`${'Sunrise'}: ${weatherData.sunrise}`}</p>
+          <p>{`${'Sunset'}: ${weatherData.sunset}`}</p>
+          <p>{`${'AQI'}: ${airQuality.aqi}`}</p>
 
           {airQuality.pollutants && (
             <ul>
