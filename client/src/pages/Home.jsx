@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const { t } = useTranslation();
   const [cities, setCities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [weatherData, setWeatherData] = useState(null);
@@ -143,19 +145,19 @@ const Home = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.heading}>Weather App</h1>
+      <h1 style={styles.heading}>{t('heading')}</h1>
       <div style={styles.searchContainer}>
         <input
           type="text"
-          placeholder="Enter location"
+          placeholder={t('searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.input}
         />
         <button onClick={handleSearch} style={styles.button}>
-          Search
+          {t('searchButton')}
         </button>
-        <button onClick={getWeatherByGeolocation}>Get Weather Near Me</button>
+        <button onClick={getWeatherByGeolocation}>{t('getWeatherButton')}</button>
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>

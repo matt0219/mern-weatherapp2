@@ -1,0 +1,6 @@
+{
+    "app.title": "Weather App",
+    "search.placeholder": "Enter location",
+    "search.button": "Search",
+    "getWeather.button": "Get Weather Near Me"
+}
