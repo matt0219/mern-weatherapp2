@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import AirQuality from '../components/AirQuality';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -198,6 +199,7 @@ const Home = () => {
           )}
         </div>
       )}
+      <AirQuality airQuality={airQuality} />
     </div>
   );
 };
