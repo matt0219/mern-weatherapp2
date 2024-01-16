@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import { format } from 'date-fns'; // Import date-fns for date formatting
+import AirQuality from '../components/AirQuality';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -125,23 +124,15 @@ const Home = () => {
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>
-          <p>{`Temperature in ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
-          <p>{`Humidity: ${weatherData.humidity}%`}</p>
-          <p>{`Wind Speed: ${weatherData.windSpeed} m/s`}</p>
-          <p>{`Forecast: ${weatherData.forecast}`}</p>
-          <p>{`Sunrise: ${weatherData.sunrise}`}</p>
-          <p>{`Sunset: ${weatherData.sunset}`}</p>
-          <p>{`AQI: ${airQuality.aqi}`}</p>
-
-          {airQuality.pollutants && (
-            <ul>
-              {Object.entries(airQuality.pollutants).map(([key, value]) => (
-                <li key={key}>{`${key}: ${value.toFixed(2)}`}</li>
-              ))}
-            </ul>
-          )}
+          <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
+          <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
+          <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
+          <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
+          <p>{`${'Sunrise'}: ${weatherData.sunrise}`}</p>
+          <p>{`${'Sunset'}: ${weatherData.sunset}`}</p>
         </div>
       )}
+      <AirQuality airQuality={airQuality} />
     </div>
   );
 };
