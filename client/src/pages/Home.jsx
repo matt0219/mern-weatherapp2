@@ -188,15 +188,6 @@ const Home = () => {
           <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
           <p>{`${'Sunrise'}: ${weatherData.sunrise}`}</p>
           <p>{`${'Sunset'}: ${weatherData.sunset}`}</p>
-          <p>{`${'AQI'}: ${airQuality.aqi}`}</p>
-
-          {airQuality.pollutants && (
-            <ul>
-              {Object.entries(airQuality.pollutants).map(([key, value]) => (
-                <li key={key}>{`${key}: ${value.toFixed(2)}`}</li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
       <AirQuality airQuality={airQuality} />
