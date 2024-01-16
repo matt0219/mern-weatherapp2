@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Line } from 'react-chartjs-2';
+import { format } from 'date-fns'; // Import date-fns for date formatting
 
 const Home = () => {
   const [cities, setCities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [weatherData, setWeatherData] = useState(null);
   const [airQuality, setAirQuality] = useState(null);
+  const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
     fetchCities();
@@ -29,14 +32,14 @@ const Home = () => {
 
   const handleSearch = () => {
     if (!searchQuery) {
-      alert(t('Please enter a location.'));
+      alert('Please enter a location.');
       return;
     }
 
     const apiKey = import.meta.env.VITE_REACT_APP_OPENWEATHERMAP_API_KEY;
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${apiKey}&units=imperial`;
 
-    let weatherData; // Declare weatherData outside the promise chain
+    let weatherData;
 
     axios
       .get(weatherApiUrl)
@@ -52,11 +55,11 @@ const Home = () => {
       })
       .then((airQualityResponse) => {
         const airQualityData = airQualityResponse.data.list[0];
-
+      
         if (airQualityData) {
           const aqi = airQualityData.main.aqi;
           const pollutants = airQualityData.components;
-
+      
           setAirQuality({
             aqi,
             pollutants,
@@ -64,112 +67,54 @@ const Home = () => {
         } else {
           console.error('Air quality data is undefined.');
         }
-
+      
         const temperatureFahrenheit = weatherData.main.temp;
         const humidity = weatherData.main.humidity;
         const windSpeed = weatherData.wind.speed;
-        const forecast = weatherData.weather[0].description;
+      
+        // Check if the forecast data is available
+        if (weatherData.daily && weatherData.daily.length >= 6) {
+          const forecastData = weatherData.daily?.slice(1, 6);
 
-        if (weatherData.sys && weatherData.sys.sunset !== null) {
-          const sunrise = new Date(weatherData.sys.sunrise * 1000);
-          const sunset = new Date(weatherData.sys.sunset * 1000);
+          if (forecastData) {
+            const chartLabels = forecastData.map(day => format(new Date(day.dt * 1000), 'MMM dd'));
+            const temperatureData = forecastData.map(day => day.temp.day);
 
-          if (!isNaN(sunset.getTime())) {
-            setWeatherData({
-              temperatureFahrenheit,
-              humidity,
-              windSpeed,
-              forecast,
-              sunrise: formatTime(sunrise),
-              sunset: formatTime(sunset),
-            });
-          } else {
-            console.error('Invalid sunset time:', weatherData.sys.sunset);
+            setChartData({
+              labels: chartLabels,
+              datasets: [
+                {
+                  label: 'Temperature (°F)',
+                  data: temperatureData,
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  fill: false,
+                  yAxisID: 'temperature-y-axis',
+                }
+              ]
+            })
           }
         } else {
-          console.error('Invalid sunset time or sys object:', weatherData.sys);
+          console.error('Forecast data is undefined or insufficient.');
+          console.log('Full weatherData:', weatherData);
         }
       })
-      .catch((error) => console.error('Error fetching data:', error));
-  };
-
-  const getWeatherByGeolocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          fetchWeatherData(latitude, longitude);
-        },
-        (error) => {
-          console.error('Error getting geolocation:', error);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by your browser.');
-    }
-  };
-
-  const fetchWeatherData = (latitude, longitude) => {
-    const apiKey = import.meta.env.VITE_REACT_APP_OPENWEATHERMAP_API_KEY;
-    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
-    const airQualityApiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
-
-    axios
-      .all([
-        axios.get(weatherApiUrl),
-        axios.get(airQualityApiUrl),
-      ])
-      .then(axios.spread((weatherResponse, airQualityResponse) => {
-        const weatherData = weatherResponse.data;
-        const airQualityData = airQualityResponse.data.list[0];
-
-        if (airQualityData) {
-          const aqi = airQualityData.main.aqi;
-          const pollutants = airQualityData.components;
-
-          setAirQuality({
-            aqi,
-            pollutants,
-          });
-        } else {
-          console.error('Air quality data is undefined.');
-        }
-
-        const temperatureFahrenheit = weatherData.main.temp;
-        const humidity = weatherData.main.humidity;
-        const windSpeed = weatherData.wind.speed;
-        const forecast = weatherData.weather[0].description;
-
-        if (weatherData.sys && weatherData.sys.sunset !== null) {
-          const sunrise = new Date(weatherData.sys.sunrise * 1000);
-          const sunset = new Date(weatherData.sys.sunset * 1000);
-
-          if (!isNaN(sunset.getTime())) {
-            setWeatherData({
-              temperatureFahrenheit,
-              humidity,
-              windSpeed,
-              forecast,
-              sunrise: formatTime(sunrise),
-              sunset: formatTime(sunset),
-            });
-          } else {
-            console.error('Invalid sunset time:', weatherData.sys.sunset);
-          }
-        } else {
-          console.error('Invalid sunset time or sys object:', weatherData.sys);
-        }
-      }))
-      .catch((error) => console.error('Error fetching data:', error));
+      
+      
+      
   };
 
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Weather App</h1>
+      {chartData && (
+        <div style={styles.chartContainer}>
+          <Line data={chartData} />
+        </div>
+      )}
       <div style={styles.searchContainer}>
         <input
           type="text"
-          placeholder='Enter location'
+          placeholder="Enter location"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.input}
@@ -177,17 +122,16 @@ const Home = () => {
         <button onClick={handleSearch} style={styles.button}>
           Search
         </button>
-        <button onClick={getWeatherByGeolocation}>Get Weather Near Me</button>
       </div>
       {weatherData && (
         <div style={styles.weatherInfo}>
-          <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
-          <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
-          <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
-          <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
-          <p>{`${'Sunrise'}: ${weatherData.sunrise}`}</p>
-          <p>{`${'Sunset'}: ${weatherData.sunset}`}</p>
-          <p>{`${'AQI'}: ${airQuality.aqi}`}</p>
+          <p>{`Temperature in ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
+          <p>{`Humidity: ${weatherData.humidity}%`}</p>
+          <p>{`Wind Speed: ${weatherData.windSpeed} m/s`}</p>
+          <p>{`Forecast: ${weatherData.forecast}`}</p>
+          <p>{`Sunrise: ${weatherData.sunrise}`}</p>
+          <p>{`Sunset: ${weatherData.sunset}`}</p>
+          <p>{`AQI: ${airQuality.aqi}`}</p>
 
           {airQuality.pollutants && (
             <ul>
@@ -212,6 +156,9 @@ const styles = {
     maxWidth: '600px',
     margin: 'auto',
     marginTop: '50px',
+  },
+  chartContainer: {
+    marginTop: '20px',
   },
   heading: {
     fontSize: '2em',
