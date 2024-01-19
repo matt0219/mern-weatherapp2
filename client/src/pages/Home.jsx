@@ -3,6 +3,7 @@ import axios from 'axios';
 import AirQuality from '../components/AirQuality';
 import TimeInfo from '../components/TimeInfo';
 import Forecast from '../components/Forecast';
+import WindSpeed from '../components/WindSpeed';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -186,11 +187,11 @@ const Home = () => {
         <div style={styles.weatherInfo}>
           <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
           <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
-          <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
         </div>
       )}
       {weatherData && (
         <>
+      <WindSpeed windSpeed={weatherData.windSpeed} />
       <Forecast forecastData={weatherData.forecast} />
       <TimeInfo title="Sunrise Time" time={weatherData.sunrise} />
       <TimeInfo title="Sunset Time" time={weatherData.sunset} />
