@@ -193,7 +193,6 @@ const Home = () => {
           <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
           <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
           <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
-          <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
         </div>
       )}
       {weatherData && (
