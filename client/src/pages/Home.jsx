@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AirQuality from '../components/AirQuality';
+import TimeInfo from '../components/TimeInfo';
 import { useTranslation } from 'react-i18next';
 
 const Home = () => {
@@ -192,9 +193,13 @@ const Home = () => {
           <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
           <p>{`${'Wind Speed'}: ${weatherData.windSpeed} m/s`}</p>
           <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
-          <p>{`${'Sunrise'}: ${weatherData.sunrise}`}</p>
-          <p>{`${'Sunset'}: ${weatherData.sunset}`}</p>
         </div>
+      )}
+      {weatherData && (
+        <>
+      <TimeInfo title="Sunrise Time" time={weatherData.sunrise} />
+      <TimeInfo title="Sunset Time" time={weatherData.sunset} />
+        </>
       )}
       <AirQuality airQuality={airQuality} />
       <div>
