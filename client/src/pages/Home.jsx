@@ -189,8 +189,12 @@ const Home = () => {
           <p>{`${'Forecast'}: ${weatherData.forecast}`}</p>
         </div>
       )}
+      {weatherData && (
+        <>
       <TimeInfo title="Sunrise Time" time={weatherData.sunrise} />
       <TimeInfo title="Sunset Time" time={weatherData.sunset} />
+        </>
+      )}
       <AirQuality airQuality={airQuality} />
     </div>
   );
