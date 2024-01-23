@@ -4,6 +4,8 @@ import AirQuality from '../components/AirQuality';
 import TimeInfo from '../components/TimeInfo';
 import Forecast from '../components/Forecast';
 import WindSpeed from '../components/WindSpeed';
+import Humidity from '../components/Humidity';
+import Temperature from '../components/Temperature';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -184,13 +186,9 @@ const Home = () => {
         <button onClick={getWeatherByGeolocation}>Get Weather Near Me</button>
       </div>
       {weatherData && (
-        <div style={styles.weatherInfo}>
-          <p>{`${'Temperature in'} ${searchQuery}: ${weatherData.temperatureFahrenheit.toFixed(2)}°F`}</p>
-          <p>{`${'Humidity'}: ${weatherData.humidity}%`}</p>
-        </div>
-      )}
-      {weatherData && (
         <>
+      <Temperature temperature={weatherData.temperatureFahrenheit} location={searchQuery} />
+      <Humidity humidity={weatherData.humidity} />
       <WindSpeed windSpeed={weatherData.windSpeed} />
       <Forecast forecastData={weatherData.forecast} />
       <TimeInfo title="Sunrise Time" time={weatherData.sunrise} />
