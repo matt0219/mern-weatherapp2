@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import AirQuality from '../components/AirQuality';
 import TimeInfo from '../components/TimeInfo';
@@ -6,6 +7,7 @@ import Forecast from '../components/Forecast';
 import WindSpeed from '../components/WindSpeed';
 import Humidity from '../components/Humidity';
 import Temperature from '../components/Temperature';
+import Login from '../components/Login';
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -196,6 +198,7 @@ const Home = () => {
         </>
       )}
       <AirQuality airQuality={airQuality} />
+      
     </div>
   );
 };
