@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './css/Login.css';
+import axios from 'axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -17,17 +18,28 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Here you can handle the form submission logic, such as sending the data to the server
-    console.log('Form submitted:', formData);
-    // You can also reset the form fields after submission
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      password2: ''
-    });
+    
+    try {
+      // Send registration data to backend server
+      const response = await axios.post('/api/users/register', formData);
+
+      // Registration successful
+      console.log('User registered successfully:', response.data);
+      // Reset form fields after successful registration
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        password2: ''
+      });
+      // Optionally, you can redirect the user to a login page or display a success message
+    } catch (error) {
+      // Registration failed
+      console.error('Error registering user:', error);
+      // Optionally, display an error message to the user
+    }
   };
 
   return (

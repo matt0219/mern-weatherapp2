@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const axios = require('axios');
 const cityRoutes = require('./routes/cityRoutes');
+const userRoutes = require('./routes/UserRoutes');
 const cors = require('cors');
 require('dotenv').config()
 
@@ -15,6 +16,8 @@ const connectDB = require('./config/connection');
 app.use(cors());
 app.use(express.json());
 app.use('/api', cityRoutes);
+app.use('/api/users', userRoutes);
+
 
 // OpenWeatherMap API integration
 const apiKey = process.env.OPENWEATHERMAP_API_KEY;
